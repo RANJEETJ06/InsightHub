@@ -3,19 +3,20 @@ spring:
     name: analysisInsights
   data:
     mongodb:
-      uri: mongodb://localhost:27017/auto_clean
+      uri: mongodb://localhost:27017/analysis
+      database: analysis
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
-  servlet:
-    multipart:
-      max-file-size: 20MB
-      max-request-size: 20MB
 server:
-  port: 8081
+  port: 8082
 
-app:
-  upload:
-    dir: uploads
+
+insight:
+  rabbitmq:
+    queue: cleaned-data-queue
+    exchange: cleaned-data-exchange
+    routing-key: cleaned-data-key
+

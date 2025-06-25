@@ -1,18 +1,23 @@
-package com.insight.uploadclean.model;
+package com.insight.analysisinsights.models;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class CleanedDataEvent {
-    private String id;
+@NoArgsConstructor
+@Builder
+public class CleanedDataEvent{
+
+    private String cleanedDataId;
     private String filePath;
     private String originalFilename;
-    private long totalRows;
+    private int totalRows;
     private List<String> columns;
 }
+
