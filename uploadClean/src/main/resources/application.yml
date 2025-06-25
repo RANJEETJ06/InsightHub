@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: uploadClean
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/auto_clean
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+server:
+  port: 8081
+
+app:
+  upload:
+    dir: uploads
