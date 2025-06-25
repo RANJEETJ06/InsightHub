@@ -17,13 +17,13 @@ public class CSVUtils {
     public static List<Map<String, Object>> readCsvAsMaps(File file, List<String> columns, Map<String, Long> nullCountsOut) throws IOException {
         List<Map<String, Object>> rows = new ArrayList<>();
 
-        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
-            CSVFormat format = CSVFormat.DEFAULT.builder()
+        try (
+            Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
+            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
-                    .build();
-
-            CSVParser parser = new CSVParser(reader, format);
+                    .build())
+        ) {
             for (CSVRecord record : parser.getRecords()) {
                 Map<String, Object> row = new LinkedHashMap<>();
                 for (String col : columns) {
@@ -44,13 +44,13 @@ public class CSVUtils {
      * Extracts the column headers from a CSV file.
      */
     public static List<String> extractHeaders(File file) throws IOException {
-        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
-            CSVFormat format = CSVFormat.DEFAULT.builder()
+        try (
+            Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
+            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
-                    .build();
-
-            CSVParser parser = new CSVParser(reader, format);
+                    .build())
+        ) {
             return new ArrayList<>(parser.getHeaderMap().keySet());
         }
     }
@@ -59,13 +59,13 @@ public class CSVUtils {
      * Reads the raw CSV records (if you want to work with Apache Commons CSV directly).
      */
     public static List<CSVRecord> readCsvRecords(File file) throws IOException {
-        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
-            CSVFormat format = CSVFormat.DEFAULT.builder()
+        try (
+            Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
+            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
-                    .build();
-
-            CSVParser parser = new CSVParser(reader, format);
+                    .build())
+        ) {
             return parser.getRecords();
         }
     }
