@@ -1,3 +1,17 @@
 spring:
   application:
     name: report
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+report:
+  rabbitmq:
+    queue: report-data-queue
+    exchange: report-exchange
+    routing-key: report.routing.key
+
+server:
+  port: 8083
