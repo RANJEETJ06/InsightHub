@@ -35,7 +35,7 @@ public class InsightServiceImpl implements InsightService {
                     .numeric(AnalysisUtils.numericSummaries(cleanedData))
                     .categorical(AnalysisUtils.categoricalTopK(cleanedData, 10,new HashSet<>()))
                     .temporal(AnalysisUtils.detectDateRange(cleanedData))
-                    .correlations(AnalysisUtils.strongCorrelations(cleanedData, 0.6))
+                    .correlations(AnalysisUtils.strongCorrelations(cleanedData, 0.3))
                     .analyzedAt(LocalDateTime.now(ZoneOffset.UTC))
                     .build();
 
