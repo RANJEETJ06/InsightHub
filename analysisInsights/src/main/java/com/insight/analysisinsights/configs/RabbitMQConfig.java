@@ -44,4 +44,15 @@ public class RabbitMQConfig {
     }
 
 
+    @Value("${report.rabbitmq.exchange}")
+    private String reportExchange;
+
+    @Value("${report.rabbitmq.routing-key}")
+    private String reportRoutingKey;
+
+    @Bean
+    public TopicExchange reportExchange() {
+        return new TopicExchange(reportExchange);
+    }
+
 }
