@@ -25,6 +25,10 @@ public class CSVUtility {
                         .build())
         ) {
             return new ArrayList<>(parser.getHeaderMap().keySet());
+        }catch (Exception e) {
+            throw new IOException("Failed to extract headers: " + e.getMessage(), e);
+        }finally {
+            System.out.println(file);
         }
     }
 
@@ -49,6 +53,8 @@ public class CSVUtility {
                 }
                 rows.add(row);
             }
+        }catch (Exception e){
+            throw new IOException("Failed to read CSV file: " + e.getMessage(), e);
         }
 
         return rows;

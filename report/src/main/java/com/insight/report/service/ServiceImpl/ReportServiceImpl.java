@@ -4,6 +4,7 @@ import com.insight.report.model.CorrelationPair;
 import com.insight.report.model.RelatedCorrelation;
 import com.insight.report.model.ReportData;
 import com.insight.report.service.ReportService;
+import com.insight.report.utils.ExcelDashboardGenerator;
 import com.insight.report.utils.GraphGenerator;
 import org.springframework.stereotype.Service;
 import org.apache.poi.ss.usermodel.*;
@@ -132,106 +133,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private void generateExcel(ReportData data, File excelFile) {
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Insight Summary");
-            int rowIdx = 0;
-
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Insight Report for " + data.getOriginalFilename());
-
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Rows: " + data.getRowCount());
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Columns: " + data.getColCount());
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Analyzed At: " + data.getAnalyzedAt());
-
-            rowIdx++;
-
-            // Null Counts
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Null Counts");
-            Row nullHeader = sheet.createRow(rowIdx++);
-            nullHeader.createCell(0).setCellValue("Column");
-            nullHeader.createCell(1).setCellValue("Null Count");
-
-            for (Map.Entry<String, Long> entry : data.getNullCounts().entrySet()) {
-                Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(entry.getKey());
-                row.createCell(1).setCellValue(entry.getValue());
-            }
-
-            rowIdx++;
-
-            // Numeric Summary
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Numeric Summary");
-            Row numHeader = sheet.createRow(rowIdx++);
-            numHeader.createCell(0).setCellValue("Column");
-            numHeader.createCell(1).setCellValue("Min");
-            numHeader.createCell(2).setCellValue("Max");
-            numHeader.createCell(3).setCellValue("Mean");
-            numHeader.createCell(4).setCellValue("Median");
-            numHeader.createCell(5).setCellValue("Std");
-
-            for (Map.Entry<String, Map<String, Object>> entry : data.getNumeric().entrySet()) {
-                Row row = sheet.createRow(rowIdx++);
-                Map<String, Object> summary = entry.getValue();
-                row.createCell(0).setCellValue(entry.getKey());
-                row.createCell(1).setCellValue(Double.parseDouble(summary.get("min").toString()));
-                row.createCell(2).setCellValue(Double.parseDouble(summary.get("max").toString()));
-                row.createCell(3).setCellValue(Double.parseDouble(summary.get("mean").toString()));
-                row.createCell(4).setCellValue(Double.parseDouble(summary.get("median").toString()));
-                row.createCell(5).setCellValue(Double.parseDouble(summary.get("std").toString()));
-            }
-
-            rowIdx++;
-
-            // Categorical
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Categorical Top Values");
-            for (Map.Entry<String, List<Map<String, Object>>> entry : data.getCategorical().entrySet()) {
-                sheet.createRow(rowIdx++).createCell(0).setCellValue(entry.getKey());
-                for (Map<String, Object> item : entry.getValue()) {
-                    Row row = sheet.createRow(rowIdx++);
-                    row.createCell(0).setCellValue(item.get("value").toString());
-                    row.createCell(1).setCellValue(Long.parseLong(item.get("count").toString()));
-                }
-            }
-
-            rowIdx++;
-
-            // Temporal
-            sheet.createRow(rowIdx++).createCell(0).setCellValue("Temporal Coverage");
-            Map<String, String> temporal = data.getTemporal();
-            Row tRow = sheet.createRow(rowIdx++);
-            tRow.createCell(0).setCellValue("Column");
-            tRow.createCell(1).setCellValue(temporal.get("column"));
-            tRow = sheet.createRow(rowIdx++);
-            tRow.createCell(0).setCellValue("Earliest");
-            tRow.createCell(1).setCellValue(temporal.get("earliest"));
-            tRow = sheet.createRow(rowIdx++);
-            tRow.createCell(0).setCellValue("Latest");
-            tRow.createCell(1).setCellValue(temporal.get("latest"));
-
-            rowIdx++;
-
-            // Correlations
-            Row corrHeader = sheet.createRow(rowIdx++);
-            corrHeader.createCell(0).setCellValue("Column");
-            corrHeader.createCell(1).setCellValue("Correlated With");
-            corrHeader.createCell(2).setCellValue("Pearson r");
-
-            for (CorrelationPair pair : data.getCorrelations()) {
-                for (RelatedCorrelation related : pair.related()) {
-                    Row row = sheet.createRow(rowIdx++);
-                    row.createCell(0).setCellValue(pair.x());
-                    row.createCell(1).setCellValue(related.y());
-                    row.createCell(2).setCellValue(Double.parseDouble(String.valueOf(related.r())));
-                }
-            }
-
-            // Save file
-            try (FileOutputStream out = new FileOutputStream(excelFile)) {
-                workbook.write(out);
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate Excel: " + e.getMessage(), e);
-        }
+        ExcelDashboardGenerator.generateExcel(data, excelFile);
     }
+
+
 
 }
