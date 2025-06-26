@@ -4,6 +4,7 @@ import com.insight.report.model.CorrelationPair;
 import com.insight.report.model.RelatedCorrelation;
 import com.insight.report.model.ReportData;
 import com.insight.report.service.ReportService;
+import com.insight.report.utils.GraphGenerator;
 import org.springframework.stereotype.Service;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,8 +14,6 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-
-
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -103,12 +102,34 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
 
+            //graphs
+            document.add(new Paragraph("\n📊 Graphs:").setBold());
+            GraphGenerator.addGraphs(document, pdfFile.getParentFile(), data);
+
+            document.add(new Paragraph("\n📊 specific vs specific relational Graphs:").setBold());
+            GraphGenerator.generateValueVsValueCharts(document, pdfFile.getParentFile(), data);
+
+            document.add(new Paragraph("\n📊 specific vs specific plots").setBold());
+            GraphGenerator.generateScatterPlot(document, pdfFile.getParentFile(), data);
+            GraphGenerator.generatePairPlot(document, pdfFile.getParentFile(), data);
+
+            document.add(new Paragraph("\n🍕 Pie Chart").setBold());
+            GraphGenerator.generatePieChart(document, pdfFile.getParentFile(), data);
+
+            document.add(new Paragraph("\n🔥 Heatmaps").setBold());
+            GraphGenerator.generateHeatmaps(document, pdfFile.getParentFile(), data);
+
+            document.add(new Paragraph("\n\uD83D\uDD39 Box Plot").setBold());
+            GraphGenerator.generateBoxPlot(document, pdfFile.getParentFile(), data);
+
+            document.add(new Paragraph("\n confusion matrix").setBold());
+            GraphGenerator.generateConfusionMatrix(document, pdfFile.getParentFile(), data);
+
             document.close();
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate PDF: " + e.getMessage(), e);
         }
     }
-
 
     private void generateExcel(ReportData data, File excelFile) {
         try (Workbook workbook = new XSSFWorkbook()) {
