@@ -51,27 +51,33 @@ cd InsightHub
 
 
 docker-compose up -d
+```
 
 Start RabbitMQ on localhost:5672
 (UI: http://localhost:15672, default user/pass: guest/guest)
 
 Start MongoDB on localhost:27017
 
-```
 
 
 While on InsightHub move to these 3 files and run all the microservices
 ### Terminal 1
+```bash
 cd uploadClean
 ./mvnw spring-boot:run
+```
 
 ### Terminal 2
+```bash
 cd analysisInsights
 ./mvnw spring-boot:run
+```
 
 ### Terminal 3
+```bash
 cd report
 ./mvnw spring-boot:run
+```
 
 ---
 
