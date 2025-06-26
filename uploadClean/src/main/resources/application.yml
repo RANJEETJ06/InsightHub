@@ -19,3 +19,5 @@ server:
 app:
   upload:
     dir: uploads
+  clean:
+    dir: cleaned

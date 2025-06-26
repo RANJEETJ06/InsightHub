@@ -28,6 +28,9 @@ public class CleaningServiceImpl implements CleaningService {
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
+    @Value("${app.clean.dir:cleaned}")
+    private String cleanedDir;
+
     @Override
     public Map<String, Object> cleanAndProcess(String fileId) {
         File file = findUploadedFile(fileId);
@@ -39,10 +42,10 @@ public class CleaningServiceImpl implements CleaningService {
             CleanedSample sample = cleanFileAndExtractSample(fileId, file);
 
             sampleRepository.save(sample);
-
+            File cleanedFile = new File(cleanedDir, "cleaned_" + fileId + ".csv");
             CleanedDataEvent event = new CleanedDataEvent(
                     sample.getId(),
-                    file.getAbsolutePath(),
+                    cleanedFile.getAbsolutePath(),
                     sample.getOriginalFilename(),
                     sample.getTotalRows(),
                     sample.getColumns()
