@@ -1,5 +1,7 @@
 package com.insight.uploadclean.service.ServiceImpl;
 
+import com.insight.uploadclean.exceptions.ProcessFailureException;
+import com.insight.uploadclean.exceptions.ResourceNotFoundException;
 import com.insight.uploadclean.model.CleanedDataEvent;
 import com.insight.uploadclean.model.CleanedSample;
 import com.insight.uploadclean.repository.CleanedSampleRepository;
@@ -35,7 +37,7 @@ public class CleaningServiceImpl implements CleaningService {
     public Map<String, Object> cleanAndProcess(String fileId) {
         File file = findUploadedFile(fileId);
         if (file == null) {
-            throw new IllegalArgumentException("File not found for ID: " + fileId);
+            throw new ResourceNotFoundException("File",fileId,fileId);
         }
 
         try {
@@ -60,7 +62,7 @@ public class CleaningServiceImpl implements CleaningService {
             );
 
         } catch (Exception e) {
-            throw new RuntimeException("Cleaning failed: " + e.getMessage(), e);
+            throw new ProcessFailureException("cleanAndProcess",fileId,e.getMessage());
         }
     }
 

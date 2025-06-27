@@ -1,6 +1,7 @@
 package com.insight.report.controller;
 
 import com.insight.report.service.ControllerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +14,10 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/api/report")
+@RequiredArgsConstructor
 public class ReportDownloadController {
 
-    ControllerService controllerService;
+    private final ControllerService controllerService;
 
     @GetMapping("/{id}/pdf")
     public ResponseEntity<Resource> downloadPdf(@PathVariable String id) {
