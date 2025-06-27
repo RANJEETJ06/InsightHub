@@ -1,5 +1,6 @@
 package com.insight.analysisinsights.utils;
 
+import com.insight.analysisinsights.exceptions.ProcessFailureException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -16,7 +17,7 @@ public class CSVUtility {
         return readCsvAsMaps(file, headers, nullCounts);  // already implemented
     }
 
-    public static List<String> extractHeaders(File file) throws IOException {
+    public static List<String> extractHeaders(File file) {
         try (
                 Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
                 CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
@@ -26,9 +27,7 @@ public class CSVUtility {
         ) {
             return new ArrayList<>(parser.getHeaderMap().keySet());
         }catch (Exception e) {
-            throw new IOException("Failed to extract headers: " + e.getMessage(), e);
-        }finally {
-            System.out.println(file);
+            throw new ProcessFailureException("analyze cleaning CSV",file.getName(),e.getMessage());
         }
     }
 
@@ -54,7 +53,7 @@ public class CSVUtility {
                 rows.add(row);
             }
         }catch (Exception e){
-            throw new IOException("Failed to read CSV file: " + e.getMessage(), e);
+            throw new ProcessFailureException("analyze cleaning CSV",file.getName(),e.getMessage());
         }
 
         return rows;

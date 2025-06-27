@@ -1,5 +1,6 @@
 package com.insight.analysisinsights.services.serviceImpl;
 
+import com.insight.analysisinsights.exceptions.ProcessFailureException;
 import com.insight.analysisinsights.models.CleanedDataEvent;
 import com.insight.analysisinsights.models.InsightResult;
 import com.insight.analysisinsights.models.ReportData;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
@@ -46,22 +48,24 @@ public class InsightServiceImpl implements InsightService {
                     .colCount(event.getColumns().size())
                     .nullCounts(AnalysisUtils.computeNullCounts(cleanedData))
                     .numeric(AnalysisUtils.numericSummaries(cleanedData))
-                    .categorical(AnalysisUtils.categoricalTopK(cleanedData, 10,new HashSet<>()))
+                    .categorical(AnalysisUtils.categoricalTopK(cleanedData, 10, new HashSet<>()))
                     .temporal(AnalysisUtils.detectDateRange(cleanedData))
                     .correlations(AnalysisUtils.strongCorrelations(cleanedData, 0.3))
                     .analyzedAt(LocalDateTime.now(ZoneOffset.UTC))
                     .build();
 
             insightRepository.save(result);
-            ReportData reportData = convertToReportData(result,event);
+            ReportData reportData = convertToReportData(result, event);
             rabbitTemplate.convertAndSend(reportExchange, reportRoutingKey, reportData);
 
+        } catch (IOException ioEx) {
+            throw new ProcessFailureException("analyze cleaning CSV", event.getOriginalFilename(), "IOException reading file: " + ioEx.getMessage());
+
         } catch (Exception e) {
-            throw new RuntimeException("Failed to analyze cleaned CSV: " + e.getMessage(), e);
+            throw new ProcessFailureException("analyze cleaning CSV", event.getOriginalFilename(), e.getMessage());
         }
-
-
     }
+
 
     private ReportData convertToReportData(InsightResult result,CleanedDataEvent event) {
         ReportData data = new ReportData();
