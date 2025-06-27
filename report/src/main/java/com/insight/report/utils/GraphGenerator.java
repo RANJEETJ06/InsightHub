@@ -11,6 +11,8 @@ import com.itextpdf.layout.element.Paragraph;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
@@ -20,6 +22,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class GraphGenerator {
@@ -74,15 +77,7 @@ public class GraphGenerator {
         }
     }
 
-    public static File generateValueVsValueChart(
-            String title,
-            String xLabel,
-            String yLabel,
-            List<Map<String, Object>> dataPoints,
-            String xKey,
-            String yKey,
-            File outputDir
-    ) {
+    public static File generateValueVsValueChart(String title, String xLabel, String yLabel, List<Map<String, Object>> dataPoints, String xKey, String yKey, File outputDir) {
         var dataset = new DefaultCategoryDataset();
 
         for (Map<String, Object> point : dataPoints) {
@@ -257,6 +252,17 @@ public class GraphGenerator {
                         "Pie Chart: " + colName, dataset, true, true, false
                 );
 
+                // 🔥 Add percentage labels
+                PiePlot plot = (PiePlot) pieChart.getPlot();
+                plot.setLabelGenerator(
+                        new StandardPieSectionLabelGenerator(
+                                "{0}: {1} ({2})",
+                                new DecimalFormat("#,##0"),
+                                new DecimalFormat("0.00%")
+                        )
+                );
+                plot.setSimpleLabels(false); // draw with leader lines
+
                 File chartFile = new File(outputDir, colName + "_pie_chart.png");
                 ChartUtils.saveChartAsPNG(chartFile, pieChart, 600, 400);
 
@@ -266,7 +272,9 @@ public class GraphGenerator {
             }
 
         } catch (Exception e) {
-            document.add(new Paragraph("❌ Error generating pie chart: " + e.getMessage()));
+            try {
+                document.add(new Paragraph("❌ Error generating pie chart: " + e.getMessage()));
+            } catch (Exception ignored) {}
         }
     }
 
@@ -341,32 +349,4 @@ public class GraphGenerator {
         }
     }
 
-    public static void generateConfusionMatrix(Document document, File outputDir, ReportData data) {
-        try {
-            DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-            dataset.addValue(50, "Predicted: Yes", "Actual: Yes");
-            dataset.addValue(10, "Predicted: No", "Actual: Yes");
-            dataset.addValue(5, "Predicted: Yes", "Actual: No");
-            dataset.addValue(35, "Predicted: No", "Actual: No");
-
-            JFreeChart chart = ChartFactory.createBarChart(
-                    "Confusion Matrix",
-                    "Actual",
-                    "Count",
-                    dataset,
-                    PlotOrientation.VERTICAL,
-                    true, true, false
-            );
-
-            File file = new File(outputDir, "confusion_matrix.png");
-            ChartUtils.saveChartAsPNG(file, chart, 640, 400);
-
-            document.add(new Paragraph("\uD83D\uDCCA Confusion Matrix:"));
-            ImageData imgData = ImageDataFactory.create(file.getAbsolutePath());
-            document.add(new Image(imgData).setAutoScale(true));
-
-        } catch (Exception e) {
-            document.add(new Paragraph("\u274C Error generating confusion matrix: " + e.getMessage()));
-        }
-    }
 }

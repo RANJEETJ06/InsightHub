@@ -4,11 +4,8 @@ import com.insight.report.model.CorrelationPair;
 import com.insight.report.model.RelatedCorrelation;
 import com.insight.report.model.ReportData;
 import com.insight.report.service.ReportService;
-import com.insight.report.utils.ExcelDashboardGenerator;
 import com.insight.report.utils.GraphGenerator;
 import org.springframework.stereotype.Service;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 // iText 7 imports
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -17,7 +14,6 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +38,6 @@ public class ReportServiceImpl implements ReportService {
 
             // 4️⃣ Generate content
             generatePDF(data, pdfFile);
-            generateExcel(data, excelFile);
 
             System.out.println("✅ Reports generated at: " + folder.getAbsolutePath());
 
@@ -123,17 +118,10 @@ public class ReportServiceImpl implements ReportService {
             document.add(new Paragraph("\n\uD83D\uDD39 Box Plot").setBold());
             GraphGenerator.generateBoxPlot(document, pdfFile.getParentFile(), data);
 
-            document.add(new Paragraph("\n confusion matrix").setBold());
-            GraphGenerator.generateConfusionMatrix(document, pdfFile.getParentFile(), data);
-
             document.close();
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate PDF: " + e.getMessage(), e);
         }
-    }
-
-    private void generateExcel(ReportData data, File excelFile) {
-        ExcelDashboardGenerator.generateExcel(data, excelFile);
     }
 
 
