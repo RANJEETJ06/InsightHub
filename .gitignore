@@ -3,3 +3,31 @@
 uploads/
 cleaned/
 reports/
+
+### React (insighthub frontend) ###
+/insighthub/node_modules
+/insighthub/.pnp
+/insighthub/.pnp.js
+
+/insighthub/coverage
+/insighthub/build
+
+/insighthub/.DS_Store
+/insighthub/.env.local
+/insighthub/.env.development.local
+/insighthub/.env.test.local
+/insighthub/.env.production.local
+
+/insighthub/npm-debug.log*
+/insighthub/yarn-debug.log*
+/insighthub/yarn-error.log*
+
+### Java / Spring Boot (backend) ###
+/target/
+*.iml
+*.class
+*.log
+
+### System files ###
+.DS_Store
+Thumbs.db

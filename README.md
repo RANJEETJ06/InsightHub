@@ -6,7 +6,7 @@ For educational purpose only,this project allow the user to get some valuable an
 
 ## 🧰 Tech Stack
 
-**Client:** Not yet implemented (planned: Vue.js)
+**Client:** React.js
 
 **Server:** Spring Boot 3 (Java 17)
 
