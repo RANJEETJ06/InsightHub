@@ -20,11 +20,15 @@ const About = () => {
         improved model accuracy, and safe experimentation environments.
       </p>
       <p className="text-gray-700 mb-4">
-        <strong>Why it is necessary:</strong> Handling real-world data often
-        involves privacy, compliance, and accessibility issues. Synthetic data
-        helps overcome these hurdles while maintaining statistical relevance and
-        realistic patterns.
+        <strong>Why it is necessary:</strong> For beginners in data analysis, it
+        is often difficult to get meaningful ideas for creating charts and
+        insights. Synthetic data provides a basic starting point, making it
+        easier to practice building graphs, reports, and dashboards. This helps
+        learners gain confidence in tools like Power BI and other visualization
+        platforms while understanding real-world patterns without needing access
+        to sensitive data.
       </p>
+
       <p className="text-gray-700 mb-4">
         <strong>Future possibilities:</strong> The platform can evolve into a
         fully automated AI-powered data generation hub capable of producing
