@@ -1,6 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
+import { uploadFiles } from "../api";
 
-const UploadSection = () => {
+const UploadSection = ({ setReportId }) => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
+  // Handle file selection
+  const handleFileChange = (e) => {
+    setSelectedFiles(Array.from(e.target.files));
+  };
+
+  // Handle form submission
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) {
+      alert("Please select at least one CSV file to upload.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const result = await uploadFiles(selectedFiles);
+      setReportId(result.fileId);
+      alert("Files uploaded successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload files.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="w-full md:w-1/2 lg:w-2/5">
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-dashed border-gray-300 hover:border-primary-500 transition-all duration-300 transform hover:-translate-y-1">
@@ -23,14 +52,24 @@ const UploadSection = () => {
               </p>
               <p className="text-xs text-gray-500">CSV files only</p>
             </div>
-            <input type="file" className="hidden" accept=".csv" />
+            <input
+              type="file"
+              className="hidden"
+              accept=".csv"
+              multiple
+              onChange={handleFileChange}
+            />
           </label>
         </div>
 
         <div className="flex justify-center">
-          <button className="px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium rounded-lg hover:from-primary-700 hover:to-primary-800 focus:ring-4 focus:ring-primary-300 transition-all duration-300 flex items-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl">
+          <button
+            onClick={handleUpload}
+            disabled={uploading}
+            className="px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium rounded-lg hover:from-primary-700 hover:to-primary-800 focus:ring-4 focus:ring-primary-300 transition-all duration-300 flex items-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <span className="material-symbols-outlined">analytics</span>
-            Generate Insights
+            {uploading ? "Uploading..." : "Generate Insights"}
           </button>
         </div>
       </div>

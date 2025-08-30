@@ -1,109 +1,171 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { getReportImages, downloadReportPdf, uploadFiles } from "../api";
 
-const ResultSection = () => {
+const ResultSection = ({ reportId }) => {
+  const [insights, setInsights] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  function formatFilename(filename) {
+    const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+    const nameWithSpaces = nameWithoutExt.replace(/_/g, " ");
+    const title = nameWithSpaces.replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return title;
+  }
+
+  // Fetch report images from backend
+  const fetchInsights = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getReportImages(reportId);
+      setInsights(data || []);
+    } catch (error) {
+      console.error("Error fetching insights:", error);
+      setInsights([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [reportId]); // only changes when reportId changes
+
+  useEffect(() => {
+    fetchInsights();
+    console.clear();
+  }, [fetchInsights]);
+
+  // Handle file upload
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      await uploadFiles(files);
+      // After upload, refresh insights
+      await fetchInsights();
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    if (reportId == null) {
+      alert("No report available for download.");
+      return;
+    }
+    downloadReportPdf(reportId);
+  };
+  const handleImageDownload = (item) => {
+    if (!item?.image) return;
+
+    // Default filename
+    const filename = "insight.png";
+
+    // Create a temporary link element
+    const link = document.createElement("a");
+    link.href = item.image; // base64 image from backend
+    link.download = filename; // filename for download
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="w-full md:w-1/2 lg:w-3/5">
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 h-full shadow-inner">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Data Insights</h2>
           <div className="flex gap-2">
-            <button className="p-3 text-gray-600 hover:text-primary-600 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110">
+            <button
+              onClick={handleDownloadPdf}
+              className="p-3 text-gray-600 hover:text-primary-600 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110"
+            >
               <span className="material-symbols-outlined">download</span>
             </button>
-            <button className="p-3 text-gray-600 hover:text-primary-600 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110">
-              <span className="material-symbols-outlined">share</span>
-            </button>
+            <input
+              type="file"
+              multiple
+              onChange={handleFileUpload}
+              disabled={uploading}
+              className="hidden"
+              id="file-upload"
+            />
+            <label
+              htmlFor="file-upload"
+              className="p-3 text-gray-600 hover:text-primary-600 rounded-full hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-110 cursor-pointer"
+            >
+              <span className="material-symbols-outlined">upload</span>
+            </label>
           </div>
         </div>
 
         <div className="mb-6">
           <div className="flex gap-3 mb-4">
-            <button className="px-5 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+            <button
+              className={`px-5 py-2 rounded-full transition-all duration-300 shadow-md transform hover:scale-105 ${"bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-lg"}`}
+              onClick={() => fetchInsights()}
+            >
               All Insights
             </button>
-            <button className="px-5 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 shadow hover:shadow-md transform hover:scale-105">
+            <button
+              onClick={() => handleDownloadPdf(reportId)}
+              className={`px-5 py-2 rounded-full transition-all duration-300 shadow-md transform hover:scale-105 ${"bg-white text-gray-700 hover:bg-gray-100 shadow"}`}
+            >
               PDF Format
             </button>
           </div>
         </div>
 
         <div className="space-y-6 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar">
-          <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-lg">
-                Revenue by Product Category
-              </h3>
-              <div className="flex gap-1">
-                <button
-                  className="p-2 text-gray-400 hover:text-primary-500 rounded-full hover:bg-gray-50 transition-all duration-300 transform hover:scale-110"
-                  title="Download PDF"
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    file_download
-                  </span>
-                </button>
+          {loading || uploading ? (
+            <div className="text-center text-gray-500 mt-20">Loading...</div>
+          ) : insights.length === 0 ? (
+            <div className="text-center text-gray-500 mt-20">
+              No data available
+            </div>
+          ) : (
+            insights.map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-semibold text-lg">
+                    {`Insight ${idx + 1}`}
+                  </h3>
+                  <div className="flex gap-1">
+                    <button
+                      className="p-2 text-gray-400 hover:text-primary-500 rounded-full hover:bg-gray-50 transition-all duration-300 transform hover:scale-110"
+                      title="Download Image"
+                      onClick={() => handleImageDownload(item)}
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        image_download
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                <div className="h-64 w-full bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  {item ? (
+                    <img
+                      src={item.image}
+                      alt={`Insight ${idx + 1}`}
+                      className="w-full object-contain"
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined text-6xl text-primary-300 animate-pulse">
+                      insert_chart
+                    </span>
+                  )}
+                </div>
+                <p className="mt-3 text-sm text-gray-600">
+                  {formatFilename(item.title) || "No description available"}
+                </p>
               </div>
-            </div>
-            <div className="h-64 w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-              <span className="material-symbols-outlined text-6xl text-primary-300 animate-pulse">
-                bar_chart
-              </span>
-            </div>
-            <p className="mt-3 text-sm text-gray-600">
-              This chart shows the distribution of revenue across your product
-              categories, with electronics leading at 45%.
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-lg">Monthly Sales Trend</h3>
-              <div className="flex gap-1">
-                <button
-                  className="p-2 text-primary-500 rounded-full hover:bg-gray-50 transition-all duration-300 transform hover:scale-110"
-                  title="Download PDF"
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    file_download
-                  </span>
-                </button>
-              </div>
-            </div>
-            <div className="h-64 w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-              <span className="material-symbols-outlined text-6xl text-primary-300 animate-pulse">
-                landscape
-              </span>
-            </div>
-            <p className="mt-3 text-sm text-gray-600">
-              Your sales show a strong seasonal pattern with peaks in November
-              and December, suggesting holiday shopping effects.
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-lg">Customer Demographics</h3>
-              <div className="flex gap-1">
-                <button
-                  className="p-2 text-gray-400 hover:text-primary-500 rounded-full hover:bg-gray-50 transition-all duration-300 transform hover:scale-110"
-                  title="Download PDF"
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    file_download
-                  </span>
-                </button>
-              </div>
-            </div>
-            <div className="h-64 w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-              <span className="material-symbols-outlined text-6xl text-primary-300 animate-pulse">
-                pie_chart
-              </span>
-            </div>
-            <p className="mt-3 text-sm text-gray-600">
-              Customer age distribution shows 65% of customers are between 25-45
-              years old, with 58% identifying as female.
-            </p>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>
