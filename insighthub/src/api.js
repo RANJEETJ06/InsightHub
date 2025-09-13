@@ -3,6 +3,7 @@ import axios from "axios";
 // Base URLs
 const API_BASE_URL_UPLOAD = "http://localhost:8081";
 const API_BASE_URL_REPORT = "http://localhost:8083";
+const API_BASE_URL_INSIGHT = "http://localhost:8082";
 
 // ------------------ Report APIs ------------------
 
@@ -55,3 +56,11 @@ export const deleteReport = async (reportId) => {
     alert("Failed to delete report");
   }
 };
+
+// Get Status of a report
+export const getReportStatus = async (reportId) => {
+  const res = await fetch(`${API_BASE_URL_INSIGHT}/api/insights/${reportId}/status`);
+  if (!res.ok) throw new Error("Failed to fetch report status");
+  return await res.json(); // returns { status: "PROCESSING" | "DONE" | "FAILED" }
+};
+

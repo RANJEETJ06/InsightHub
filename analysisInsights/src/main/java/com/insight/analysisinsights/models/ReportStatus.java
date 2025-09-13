@@ -1,4 +1,3 @@
 package com.insight.analysisinsights.models;
 
-public class ReportStatus {
-}
+public record ReportStatus(String Status){}

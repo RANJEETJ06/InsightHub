@@ -1,16 +1,88 @@
 version: "3.9"
+
 services:
   rabbit:
     image: rabbitmq:3-management
-    ports: ["5672:5672", "15672:15672"]
+    container_name: rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      hostname: localhost
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - insighthub
+
   mongodb:
     image: mongo:7
-    ports: ["27017:27017"]
-  # Microservices will be added here or run from IDE
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - insighthub
+
+  upload-clean-service:
+    image: ranjeetjena06/upload-clean-service:d1
+    container_name: upload_clean
+    depends_on:
+      - mongodb
+      - rabbit
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/auto_clean
+      SPRING_RABBITMQ_HOST: rabbit
+      SERVER_PORT: 8081
+      APP_UPLOAD_DIR: /app/uploads
+      APP_CLEAN_DIR: /app/cleaned
+    volumes:
+      - D:/projects/spring/insighthub/uploads:/app/uploads
+      - D:/projects/spring/insighthub/cleaned:/app/cleaned
+    ports:
+      - "8081:8081"
+    networks:
+      - insighthub
+
+  analysis-insights-service:
+    image: ranjeetjena06/analysis-insights-service:d1
+    container_name: analysis_insights
+    depends_on:
+      - mongodb
+      - rabbit
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/analysis
+      SPRING_RABBITMQ_HOST: rabbit
+      SERVER_PORT: 8082
+    volumes:
+      - D:/projects/spring/insighthub/cleaned:/app/cleaned
+    ports:
+      - "8082:8082"
+    networks:
+      - insighthub
+
+  report-service:
+    image: ranjeetjena06/report-service:d1
+    container_name: report_service
+    depends_on:
+      - rabbit
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit
+      SERVER_PORT: 8083
+      APP_UPLOAD_DIR: /app/uploads
+      APP_CLEAN_DIR: /app/cleaned
+      APP_REPORT_DIR: /app/reports
+    volumes:
+      - D:/projects/spring/insighthub/uploads:/app/uploads
+      - D:/projects/spring/insighthub/cleaned:/app/cleaned
+      - D:/projects/spring/insighthub/reports:/app/reports
+    ports:
+      - "8083:8083"
+    networks:
+      - insighthub
+
 networks:
-  default:
-    name: insighthub
+  insighthub:
+    driver: bridge
+
+volumes:
+  mongo_data:

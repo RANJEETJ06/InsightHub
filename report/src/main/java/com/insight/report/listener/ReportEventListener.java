@@ -14,7 +14,6 @@ public class ReportEventListener {
 
     @RabbitListener(queues = "${report.rabbitmq.queue}")
     public void handleReportData(ReportData data) {
-        System.out.println(data.toString());
         reportService.generateReports(data);
     }
 }

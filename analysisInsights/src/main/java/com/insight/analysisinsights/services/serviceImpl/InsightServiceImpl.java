@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -64,6 +65,21 @@ public class InsightServiceImpl implements InsightService {
         } catch (Exception e) {
             throw new ProcessFailureException("analyze cleaning CSV", event.getOriginalFilename(), e.getMessage());
         }
+    }
+
+    @Override
+    public String getReportStatus(String filename) {
+        File file = new File("/app/cleaned/cleaned_"+filename);
+
+        if (!file.exists()) {
+            return "PROCESSING"; // file not ready yet
+        }
+
+        if (file.length() == 0) {
+            return "FAILED"; // optionally check for empty files
+        }
+
+        return "DONE";
     }
 
 
