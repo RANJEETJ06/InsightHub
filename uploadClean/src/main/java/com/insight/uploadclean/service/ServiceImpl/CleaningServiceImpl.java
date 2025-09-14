@@ -99,7 +99,7 @@ public class CleaningServiceImpl implements CleaningService {
             // Step 3: Remove outliers
             removeOutliers(allRows, columns);
 
-            FileWriteUtil.writeCleanedDataToCsv(fileId, columns, allRows);
+            FileWriteUtil.writeCleanedDataToCsv(cleanedDir,fileId, columns, allRows);
 
             // Step 4: Take 5 sample rows
             List<Map<String, Object>> sampleRows = allRows.subList(0, Math.min(5, allRows.size()));

@@ -20,6 +20,6 @@ server:
 
 app:
   upload:
-    dir: uploads
+    dir: /app/uploads
   clean:
-    dir: cleaned
+    dir: /app/cleaned

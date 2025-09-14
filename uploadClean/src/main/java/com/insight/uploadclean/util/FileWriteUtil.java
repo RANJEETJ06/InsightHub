@@ -1,5 +1,6 @@
 package com.insight.uploadclean.util;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,12 +9,12 @@ import java.util.Map;
 
 public class FileWriteUtil {
 
-    public static void writeCleanedDataToCsv(String fileId, List<String> headers, List<Map<String, Object>> rows) throws IOException {
-        String outputDir = "cleaned";
-        String outputFile = outputDir + "/cleaned_" + fileId + ".csv";
-
-        // Create a directory if it doesn't exist
-        java.nio.file.Files.createDirectories(java.nio.file.Paths.get(outputDir));
+    public static void writeCleanedDataToCsv(String dirPath,String fileId, List<String> headers, List<Map<String, Object>> rows) throws IOException {
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            dir.mkdirs(); // create a directory if it doesn't exist
+        }
+        String outputFile = dirPath + "/cleaned_" + fileId + ".csv";
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(outputFile))) {
             // Write header

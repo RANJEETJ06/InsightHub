@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   rabbit:
     image: rabbitmq:3-management
@@ -36,8 +34,8 @@ services:
       APP_UPLOAD_DIR: /app/uploads
       APP_CLEAN_DIR: /app/cleaned
     volumes:
-      - D:/projects/spring/insighthub/uploads:/app/uploads
-      - D:/projects/spring/insighthub/cleaned:/app/cleaned
+      - ./uploads:/app/uploads
+      - ./cleaned:/app/cleaned
     ports:
       - "8081:8081"
     networks:
@@ -54,7 +52,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbit
       SERVER_PORT: 8082
     volumes:
-      - D:/projects/spring/insighthub/cleaned:/app/cleaned
+      - ./cleaned:/app/cleaned
     ports:
       - "8082:8082"
     networks:
@@ -72,9 +70,9 @@ services:
       APP_CLEAN_DIR: /app/cleaned
       APP_REPORT_DIR: /app/reports
     volumes:
-      - D:/projects/spring/insighthub/uploads:/app/uploads
-      - D:/projects/spring/insighthub/cleaned:/app/cleaned
-      - D:/projects/spring/insighthub/reports:/app/reports
+      - ./uploads:/app/uploads
+      - ./cleaned:/app/cleaned
+      - ./reports:/app/reports
     ports:
       - "8083:8083"
     networks:
