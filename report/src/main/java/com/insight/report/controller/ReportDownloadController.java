@@ -4,6 +4,7 @@ import com.insight.report.exceptions.ResourceNotFoundException;
 import com.insight.report.service.ControllerService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
-
 @RestController
 @RequestMapping("/api/report")
 @RequiredArgsConstructor
@@ -23,9 +23,13 @@ public class ReportDownloadController {
 
     private final ControllerService controllerService;
 
+    // Use environment variable for Docker-friendly path
+    @Value("${app.report.dir:/app/reports}")
+    private String reportDir;
+
     @GetMapping("/{id}/pdf")
     public ResponseEntity<Resource> downloadPdf(@PathVariable String id) {
-        File pdf = new File("./reports/" + id + "/report.pdf");
+        File pdf = new File(reportDir, id + "/report.pdf");
 
         if (!pdf.exists()) {
             throw new ResourceNotFoundException("PDF report not found", id, pdf.getAbsolutePath());
@@ -39,9 +43,10 @@ public class ReportDownloadController {
                 .contentLength(pdf.length())
                 .body(resource);
     }
+
     @GetMapping("/{id}/data")
     public ResponseEntity<List<Map<String, String>>> getData(@PathVariable String id) throws IOException {
-        File folder = new File("./reports/" + id);
+        File folder = new File(reportDir, id);
 
         if (!folder.exists() || !folder.isDirectory()) {
             throw new ResourceNotFoundException("Folder not found", id, folder.getAbsolutePath());
@@ -61,10 +66,11 @@ public class ReportDownloadController {
 
         for (File image : imageFiles) {
             byte[] bytes = Files.readAllBytes(image.toPath());
-            String base64 = "data:image/" + getFileExtension(image.getName()) + ";base64," + Base64.getEncoder().encodeToString(bytes);
+            String base64 = "data:image/" + getFileExtension(image.getName()) + ";base64," +
+                    Base64.getEncoder().encodeToString(bytes);
 
             Map<String, String> obj = new HashMap<>();
-            obj.put("title", image.getName());  // use filename as title
+            obj.put("title", image.getName());
             obj.put("image", base64);
             imagesWithTitles.add(obj);
         }
@@ -73,24 +79,22 @@ public class ReportDownloadController {
     }
 
     private String getFileExtension(String filename) {
-        return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+        int idx = filename.lastIndexOf(".");
+        return (idx > 0) ? filename.substring(idx + 1).toLowerCase() : "";
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReport(@PathVariable String id) {
-        File reportFolder = new File("./reports/" + id);
+        File reportFolder = new File(reportDir, id);
         if (!reportFolder.exists()) {
             return ResponseEntity.notFound().build();
         }
 
         try {
-            FileUtils.deleteDirectory(reportFolder); // Apache Commons IO
+            FileUtils.deleteDirectory(reportFolder);
             return ResponseEntity.ok().build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
-
 }

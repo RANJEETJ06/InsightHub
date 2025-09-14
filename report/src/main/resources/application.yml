@@ -13,5 +13,9 @@ report:
     exchange: report-exchange
     routing-key: report.routing.key
 
+app:
+  report:
+    dir: /app/reports
+
 server:
   port: 8083

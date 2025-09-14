@@ -5,6 +5,7 @@ import com.insight.report.model.RelatedCorrelation;
 import com.insight.report.model.ReportData;
 import com.insight.report.service.ReportService;
 import com.insight.report.utils.GraphGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 // iText 7 imports
@@ -20,12 +21,15 @@ import java.util.Map;
 @Service
 public class ReportServiceImpl implements ReportService {
 
+    @Value("${app.report.dir:/app/reports}")
+    private String reportDir;
+
     @Override
     public void generateReports(ReportData data) {
         try {
             // 1️⃣ Define the target folder path
             String baseName = data.getOriginalFilename().replaceAll("\\.[^.]+$", "");
-            File folder = new File("./reports/" + baseName);
+            File folder = new File(reportDir,baseName);
 
             // 2️⃣ Create the folder if it doesn't exist
             if (!folder.exists()) {
