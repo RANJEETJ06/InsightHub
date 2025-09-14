@@ -66,13 +66,6 @@ services:
     environment:
       SPRING_RABBITMQ_HOST: rabbit
       SERVER_PORT: 8083
-      APP_UPLOAD_DIR: /app/uploads
-      APP_CLEAN_DIR: /app/cleaned
-      APP_REPORT_DIR: /app/reports
-    volumes:
-      - ./uploads:/app/uploads
-      - ./cleaned:/app/cleaned
-      - ./reports:/app/reports
     ports:
       - "8083:8083"
     networks:

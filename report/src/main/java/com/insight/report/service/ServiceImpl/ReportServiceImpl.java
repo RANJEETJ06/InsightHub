@@ -34,12 +34,9 @@ public class ReportServiceImpl implements ReportService {
 
             // 3️⃣ Create PDF and Excel files inside that folder
             File pdfFile = new File(folder, "report.pdf");
-            File excelFile = new File(folder, "report.xlsx");
 
             // 4️⃣ Generate content
             generatePDF(data, pdfFile);
-
-            System.out.println("✅ Reports generated at: " + folder.getAbsolutePath());
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate reports: " + e.getMessage(), e);
