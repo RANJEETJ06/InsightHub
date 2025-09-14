@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-service
+  namespace: insighthub
+spec:
+  selector:
+    app: report-service
+  ports:
+    - port: 8083
+      targetPort: 8083
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-service
+  namespace: insighthub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-service
+  template:
+    metadata:
+      labels:
+        app: report-service
+    spec:
+      containers:
+        - name: report-service
+          image: ranjeetjena06/report-service:d1
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbit"
+            - name: SERVER_PORT
+              value: "8083"
+            - name: APP_REPORT_DIR
+              value: "/app/reports"
+            - name: APP_CLEAN_DIR
+              value: "/app/cleaned"
+          volumeMounts:
+            - name: cleaned
+              mountPath: /app/cleaned
+            - name: reports
+              mountPath: /app/reports
+      volumes:
+        - name: cleaned
+          persistentVolumeClaim:
+            claimName: cleaned-pvc
+        - name: reports
+          persistentVolumeClaim:
+            claimName: reports-pvc

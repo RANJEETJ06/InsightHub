@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analysis-insights
+  namespace: insighthub
+spec:
+  selector:
+    app: analysis-insights
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analysis-insights
+  namespace: insighthub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analysis-insights
+  template:
+    metadata:
+      labels:
+        app: analysis-insights
+    spec:
+      containers:
+        - name: analysis-insights
+          image: ranjeetjena06/analysis-insights-service:d1
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://mongodb:27017/analysis"
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbit"
+            - name: SERVER_PORT
+              value: "8082"
+            - name: APP_CLEAN_DIR
+              value: "/app/cleaned"
+          volumeMounts:
+            - name: cleaned
+              mountPath: /app/cleaned
+      volumes:
+        - name: cleaned
+          persistentVolumeClaim:
+            claimName: cleaned-pvc
